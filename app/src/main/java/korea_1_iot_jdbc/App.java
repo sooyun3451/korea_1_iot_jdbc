@@ -3,12 +3,17 @@
  */
 package korea_1_iot_jdbc;
 
-public class App {
-    public String getGreeting() {
-        return "Hello World!!!";
-    }
+import korea_1_iot_jdbc.main.UserManager;
 
+public class App {
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        
+    	UserManager userManager = new UserManager();
+    	
+    	try {
+    		userManager.run();
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
     }
 }
