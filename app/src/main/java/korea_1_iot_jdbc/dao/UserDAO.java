@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import korea_1_iot_jdbc.db.DBConnection;
 import korea_1_iot_jdbc.entity.User;
@@ -17,39 +19,133 @@ import korea_1_iot_jdbc.entity.User;
 
 // UserDAO 클래스 정의
 public class UserDAO {
-	// 아이디를 기준으로 사용자 정보를 가져오는 메서드 
+	// 아이디를 기준으로 사용자 정보를 가져오는 메서드
 	public User getUserById(int id) throws SQLException {
-		// DBConnection을 통해 DB 연결을 가져옴 
+		// DBConnection을 통해 DB 연결을 가져옴
 		Connection connection = DBConnection.getConnection();
-		
-		// 실행할 SQL문 작성: id를 조건으로 사용자 정보 조회 
-		// : 동적 파라미터 
+
+		// 실행할 SQL문 작성: id를 조건으로 사용자 정보 조회
+		// : 동적 파라미터
 		String sql = "SELECT * FROM user WHERE id = ?";
-		
-		// SQL 쿼리를 실행하기 위해 PreparedStatement 객체를 생성 
+
+		// SQL 쿼리를 실행하기 위해 PreparedStatement 객체를 생성
 		PreparedStatement statement = connection.prepareStatement(sql);
-		
-		// 실행 객체에 파라미터 값을 설정 
-		statement.setInt(1, id); 
-		
-		// SQL 쿼리를 실행하고 결과를 ResultSet으로 저장 
+
+		// 실행 객체에 파라미터 값을 설정
+		statement.setInt(1, id);
+
+		// SQL 쿼리를 실행하고 결과를 ResultSet으로 저장
 		ResultSet resultSet = statement.executeQuery();
-		
-		User user = null; // User 객체를 null로 초기화 
-		if(resultSet.next()) { // 결과 집합에 다음 행이 있으면 true를 반환 
-			
-			// User 객체를 생성하고 결과를 저장 
-			user = new User(resultSet.getInt("id")
-					, resultSet.getString("name")
-					, resultSet.getString("email"));
+
+		User user = null; // User 객체를 null로 초기화
+		if (resultSet.next()) { // 결과 집합에 다음 행이 있으면 true를 반환
+
+			// User 객체를 생성하고 결과를 저장
+			user = new User(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("email"));
 		}
-		
+
 		resultSet.close();
 		statement.close();
 		connection.close();
+
+		return user; // 조회된 사용자 정보를 담은 User 객체 반환
+
+	}
+
+	// 모든 사용자 정보를 조회하는 메서드
+	public List<User> getAllUsers() throws SQLException {
+		// DB연결을 가져옴
+		Connection connection = DBConnection.getConnection();
+
+		// 모든 사용자 정보를 조회하는 SQL 쿼리문
+		String sql = "SELECT * FROM user";
+
+		// PreparedStatement 객체를 생성
+		PreparedStatement statement = connection.prepareStatement(sql);
+
+		// 쿼리를 실행하고 결과를 ResultSet으로 전달받음
+		ResultSet resultSet = statement.executeQuery();
+
+		// User객체를 저장할 리스트 생성
+		List<User> users = new ArrayList<User>();
+
+		// 결과 집합에서 다음 행이 있는 동안 반복
+		while (resultSet.next()) {
+			User user = new User(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("email"));
+
+			// 리스트에 User 객체를 추가
+			users.add(user);
+		}
+
+		// 리소스 헤제
+		resultSet.close();
+		statement.close();
+		connection.close();
+
+		return users;
+	}
+	
+	// 사용자 정보를 추가하는 메서드 
+	public void addUser(User user) throws SQLException {
+		Connection connection = DBConnection.getConnection();
+		String sql = "INSERT INTO user (name, email) VALUES (?, ?)";
 		
-		return user; // 조회된 사용자 정보를 담은 User 객체 반환 
+		PreparedStatement statement = connection.prepareStatement(sql);
 		
+		statement.setString(1, user.getName());
+		statement.setString(2, user.getEmail());
+		
+		statement.executeUpdate();
+		
+		statement.close();
+		connection.close();
+	}
+	
+	public void updateUser(User user) throws SQLException {
+		Connection connection = DBConnection.getConnection();
+		
+		// 업데이트할 이름과 이메일이 있는지 확인 
+		boolean updateName = user.getName() != null && !user.getName().isEmpty();
+		boolean updateEmail = user.getEmail() != null && !user.getEmail().isEmpty();
+		
+		// SQL 쿼리 작성 
+		// cf) StringBuilder 
+		//		: 자바에서 가변 문자열을 만드는 클래스 
+		StringBuilder sql = new StringBuilder("UPDATE user SET ");
+		
+		if(updateName) {
+			sql.append("name = ?, ");
+		}
+		
+		if(updateEmail) {
+			sql.append("email = ?, ");
+		}
+		
+		// 마지막 ,를 제거(, )
+		sql.deleteCharAt(sql.length() -2);
+		
+		// UPDATE user SET name = ?, email = ?, 
+		
+		// where절 추가 
+		sql.append("WHERE id = ?");
+		
+		PreparedStatement statement = connection.prepareStatement(sql.toString());
+		
+		int parameterIndex = 1;
+		if (updateName) {
+			statement.setString(parameterIndex++, user.getName());
+		}
+		
+		if (updateEmail) {
+			statement.setString(parameterIndex++, user.getEmail());
+		}
+		
+		statement.setInt(parameterIndex, user.getId());
+		
+		statement.executeUpdate();
+		
+		statement.close();
+		connection.close();
 	}
 
 }

@@ -2,7 +2,6 @@ package korea_1_iot_jdbc.entity;
 
 // Entity
 // : 데이터베이스 테이블과 매핑되는 클래스 
-
 public class User {
 	private int id;
 	private String name;
