@@ -121,8 +121,11 @@ public class UserDAO {
 			sql.append("email = ?, ");
 		}
 		
-		// 마지막 ,를 제거(, )
-		sql.deleteCharAt(sql.length() -2);
+		// 이름이나 이메일이 둘 중 하나라도 있는 경우에만 마지막 ,를 제거(, )
+		if (updateName || updateName) {
+			sql.deleteCharAt(sql.length() -2);			
+		}
+		// >> 존재하지 않더라도 오류 X
 		
 		// UPDATE user SET name = ?, email = ?, 
 		
@@ -142,10 +145,28 @@ public class UserDAO {
 		
 		statement.setInt(parameterIndex, user.getId());
 		
+		// SQL 실행 
 		statement.executeUpdate();
 		
 		statement.close();
 		connection.close();
+	}
+	
+	public void deleteUser(int id) throws SQLException {
+		
+		try(Connection connection = DBConnection.getConnection()) {
+			String sql = "DELETE FROM user WHERE id = ?";
+			
+			PreparedStatement statement = connection.prepareStatement(sql);
+			statement.setInt(1, id);
+			statement.executeUpdate();
+			
+			statement.close();
+			connection.close();
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -110,7 +110,7 @@ public class UserManager {
 		System.out.print("사용자의 새 이름 (변경하지 않으려면 Enter)");
 		String name = scanner.nextLine();
 		
-		System.out.print("사용자의 새 이메일");
+		System.out.print("사용자의 새 이메일 (변경하지 않으려면 Enter)");
 		String email = scanner.nextLine();
 		
 		if(!name.isEmpty()) {
@@ -128,10 +128,14 @@ public class UserManager {
 	
 	// 사용자 삭제(DELETE)
 	private void deleteUser(Scanner scanner, UserDAO userDao) throws SQLException {
+		System.out.println("삭제할 사용자 ID입력: ");
 		
+		// 스캐너를 사용한 id 값을 변수에 할당 
+		int id = Integer.parseInt(scanner.nextLine());
+		
+		// UserDAO에 메서드를 호출하여 id값을 인자로 전달 - DB의 데이터 삭제 
+		userDao.deleteUser(id);
+		
+		System.out.println("사용자가 성공적으로 삭제되었습니다.");
 	}
-	
-	
-	
-
 }
